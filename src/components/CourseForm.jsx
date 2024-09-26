@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
+const token = localStorage.getItem("token");
 
 const CourseForm = ({ onSubmit, initialData = {} }) => {
   const [courseData, setCourseData] = useState({
@@ -16,7 +17,11 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/users/getTeachers`);
+        const response = await axios.get(`${BASE_URL}/users/getTeachers`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setTeachers(response.data.data);
       } catch (error) {
         console.error("Error fetching teachers:", error);
@@ -34,7 +39,7 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
     e.preventDefault();
     if (typeof onSubmit === "function") {
       onSubmit(courseData);
-    } else { 
+    } else {
       console.error("onSubmit is not a function");
     }
   };

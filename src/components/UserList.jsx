@@ -8,7 +8,10 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  IconButton,
 } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from "axios";
 import PropTypes from 'prop-types';
 
@@ -19,6 +22,7 @@ const UserList = ({ role }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -27,7 +31,13 @@ const UserList = ({ role }) => {
       return;
     }
     fetchUsers();
+    checkAdminStatus();
   }, [page, rowsPerPage]);
+
+  const checkAdminStatus = () => {
+    const userRole = localStorage.getItem("userRole");
+    setIsAdmin(userRole === "admin");
+  };
 
   const fetchUsers = async () => {
     try {
@@ -61,6 +71,16 @@ const UserList = ({ role }) => {
     }
   };
 
+  const handleEdit = (userId) => {
+    // Implement edit functionality
+    console.log("Edit user:", userId);
+  };
+
+  const handleDelete = (userId) => {
+    // Implement delete functionality
+    console.log("Delete user:", userId);
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -79,6 +99,7 @@ const UserList = ({ role }) => {
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Role</TableCell>
+              {isAdmin && <TableCell>Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -87,6 +108,16 @@ const UserList = ({ role }) => {
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    <IconButton onClick={() => handleEdit(user._id)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(user._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
             {Array.from(Array(rowsPerPage - users.length)).map((_, index) => (

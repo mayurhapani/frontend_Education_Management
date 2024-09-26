@@ -8,25 +8,36 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  IconButton,
 } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from "axios";
+import PropTypes from "prop-types";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const CourseList = () => {
-  const [courses, setCourses] = useState([]);
+const CourseList = ({ initialCourses = [] }) => {
+  const [courses, setCourses] = useState(initialCourses);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalCourses, setTotalCourses] = useState(0);
+  const [totalCourses, setTotalCourses] = useState(initialCourses.length);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("No token found. User might not be logged in.");
-      return;
+    if (initialCourses.length > 0) {
+      setCourses(initialCourses);
+      setTotalCourses(initialCourses.length);
+    } else {
+      fetchCourses();
     }
-    fetchCourses();
-  }, [page, rowsPerPage]);
+    checkAdminStatus();
+  }, [initialCourses, page, rowsPerPage]);
+
+  const checkAdminStatus = () => {
+    const userRole = localStorage.getItem("userRole");
+    setIsAdmin(userRole === "admin");
+  };
 
   const fetchCourses = async () => {
     try {
@@ -49,7 +60,7 @@ const CourseList = () => {
         setCourses(response.data.data.docs || []);
         setTotalCourses(response.data.data.totalDocs || 0);
       } else {
-        console.log("No courses found or empty response");
+        console.error("Unexpected API response structure:", response.data);
         setCourses([]);
         setTotalCourses(0);
       }
@@ -69,6 +80,16 @@ const CourseList = () => {
     setPage(0);
   };
 
+  const handleEdit = (courseId) => {
+    // Implement edit functionality
+    console.log("Edit course:", courseId);
+  };
+
+  const handleDelete = (courseId) => {
+    // Implement delete functionality
+    console.log("Delete course:", courseId);
+  };
+
   return (
     <Paper>
       <TableContainer>
@@ -78,6 +99,7 @@ const CourseList = () => {
               <TableCell>Title</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Teacher</TableCell>
+              {isAdmin && <TableCell>Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -85,7 +107,17 @@ const CourseList = () => {
               <TableRow key={course._id}>
                 <TableCell>{course.title}</TableCell>
                 <TableCell>{course.description}</TableCell>
-                <TableCell>{course.teacher.name}</TableCell>
+                <TableCell>{course.teacher?.name || 'N/A'}</TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    <IconButton onClick={() => handleEdit(course._id)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(course._id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
             {/* Fill remaining rows to maintain fixed table size */}
@@ -108,6 +140,10 @@ const CourseList = () => {
       />
     </Paper>
   );
+};
+
+CourseList.propTypes = {
+  initialCourses: PropTypes.array
 };
 
 export default CourseList;

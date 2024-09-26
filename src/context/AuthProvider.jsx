@@ -69,6 +69,7 @@ export const AuthProvider = ({ children }) => {
             setIsLoggedIn(true);
             setUserName(userData.name || "");
             setUserRole(userData.role || "");
+            localStorage.setItem("userRole", userData.role || "");
           } else {
             console.error("Invalid user data structure:", response.data);
             throw new Error("Invalid user data received");
@@ -128,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         setUser(response.data.data.user);
         setUserName(response.data.data.user.name || "");
         setUserRole(response.data.data.user.role || "");
+        localStorage.setItem("userRole", response.data.data.user.role || "");
 
         // Add a delay before checking login status
         setTimeout(async () => {

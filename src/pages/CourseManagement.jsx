@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Typography, Grid, Paper } from "@mui/material";
 import CourseForm from "../components/CourseForm";
 import CourseList from "../components/CourseList";
@@ -9,10 +9,33 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
+  const token = localStorage.getItem("token");
+
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/courses/getAllCourses`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCourses(response.data.data.docs);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      toast.error("Failed to fetch courses");
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   const handleSubmit = async (courseData) => {
     try {
-      const response = await axios.post(`${BASE_URL}/courses/createCourse`, courseData);
+      const response = await axios.post(`${BASE_URL}/courses/createCourse`, courseData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setCourses([...courses, response.data.data]);
       toast.success("Course created successfully!");
     } catch (error) {
@@ -40,7 +63,7 @@ const CourseManagement = () => {
             <Typography variant="h6" gutterBottom>
               Courses
             </Typography>
-            <CourseList />
+            <CourseList courses={courses} />
           </Paper>
         </Grid>
       </Grid>
