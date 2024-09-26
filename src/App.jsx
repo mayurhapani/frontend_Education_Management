@@ -5,67 +5,106 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { AuthContext } from "./context/AuthProvider.jsx";
-import { ExpenseProvider } from "./context/ExpenseContext"; // Add this import
 import Header from "./components/Header.jsx";
 import GlobalLoader from "./components/GlobalLoader.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import TeacherDashboard from "./pages/TeacherDashboard.jsx";
+import StudentDashboard from "./pages/StudentDashboard.jsx";
+import CourseManagement from "./pages/CourseManagement.jsx";
+import EnrollmentManagement from "./pages/EnrollmentManagement.jsx";
+import GradeManagement from "./pages/GradeManagement.jsx";
 import Profile from "./pages/Profile.jsx";
 import Signin from "./pages/Signin.jsx";
 import Signup from "./pages/Signup.jsx";
 
-const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn, loading } = useContext(AuthContext);
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { isLoggedIn, loading, user } = useContext(AuthContext);
 
   if (loading) return <GlobalLoader />;
   if (!isLoggedIn) return <Navigate to="/signin" />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" />;
 
   return children;
-};  
+};
 
 ProtectedRoute.propTypes = {
   children: PropTypes.node.isRequired,
+  allowedRoles: PropTypes.arrayOf(PropTypes.string),
 };
 
 function App() {
-  const { loading } = useContext(AuthContext);
+  const { loading, user } = useContext(AuthContext);
+
+  const getDashboardByRole = () => {
+    switch (user?.role) {
+      case 'admin':
+        return <AdminDashboard />;
+      case 'teacher':
+        return <TeacherDashboard />;
+      case 'student':
+        return <StudentDashboard />;
+      default:
+        return <Navigate to="/signin" />;
+    }
+  };
 
   return (
-    <ExpenseProvider>
-      {" "}
-      {/* Add this wrapper */}
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
-            {loading ? (
-              <GlobalLoader />
-            ) : (
-              <Routes>
-                <Route path="/signin" element={<Signin />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            )}
-          </main>
-          <ToastContainer />
-        </div>
-      </Router>
-    </ExpenseProvider>
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          {loading ? (
+            <GlobalLoader />
+          ) : (
+            <Routes>
+              <Route path="/signin" element={<Signin />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    {getDashboardByRole()}
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/course-management"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+                    <CourseManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/enrollment-management"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <EnrollmentManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/grade-management"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+                    <GradeManagement />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          )}
+        </main>
+        <ToastContainer />
+      </div>
+    </Router>
   );
 }
 

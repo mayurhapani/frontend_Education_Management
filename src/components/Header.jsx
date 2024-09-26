@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthProvider";
-import { FaUser, FaSignOutAlt, FaChartPie, FaWallet, FaCog } from "react-icons/fa";
+import { FaUser, FaSignOutAlt, FaGraduationCap, FaBook, FaCog } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
-  const { isLoggedIn, userName, logout } = useContext(AuthContext);
+  const { isLoggedIn, userName, logout, user } = useContext(AuthContext);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef(null);
 
@@ -28,15 +28,15 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-gradient-to-r from-green-400 to-blue-500 shadow-lg z-50">
+    <header className="bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <Link
             to="/"
-            className="text-2xl md:text-3xl font-bold text-white hover:text-green-100 transition duration-300 flex items-center"
+            className="text-2xl md:text-3xl font-bold text-white hover:text-blue-100 transition duration-300 flex items-center"
           >
-            <FaWallet className="mr-2" />
-            ExpenseTracker
+            <FaGraduationCap className="mr-2" />
+            EduManage
           </Link>
           <nav>
             <ul className="flex items-center space-x-6">
@@ -45,16 +45,16 @@ export default function Header() {
                   <li>
                     <Link
                       to="/"
-                      className="text-white hover:text-green-100 transition duration-300 flex items-center"
+                      className="text-white hover:text-blue-100 transition duration-300 flex items-center"
                     >
-                      <FaChartPie className="mr-2" />
+                      <FaBook className="mr-2" />
                       Dashboard
                     </Link>
                   </li>
                   <li className="relative" ref={userMenuRef}>
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center space-x-2 text-white hover:text-green-100 transition duration-300 bg-white bg-opacity-20 rounded-full px-4 py-2"
+                      className="flex items-center space-x-2 text-white hover:text-blue-100 transition duration-300 bg-white bg-opacity-20 rounded-full px-4 py-2"
                     >
                       <FaUser />
                       <span className="font-semibold">{userName}</span>
@@ -70,14 +70,23 @@ export default function Header() {
                         >
                           <Link
                             to="/profile"
-                            className="px-4 py-2 text-sm text-gray-700 hover:bg-green-500 hover:text-white transition duration-300 flex items-center"
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 hover:text-white transition duration-300 flex items-center"
                           >
                             <FaCog className="mr-2" />
                             Profile
                           </Link>
+                          {user?.role === 'admin' && (
+                            <Link
+                              to="/course-management"
+                              className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 hover:text-white transition duration-300 flex items-center"
+                            >
+                              <FaBook className="mr-2" />
+                              Course Management
+                            </Link>
+                          )}
                           <button
                             onClick={handleLogout}
-                            className="px-4 py-2 text-sm text-gray-700 hover:bg-green-500 hover:text-white w-full text-left transition duration-300 flex items-center"
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 hover:text-white w-full text-left transition duration-300 flex items-center"
                           >
                             <FaSignOutAlt className="mr-2" />
                             Logout
@@ -92,7 +101,7 @@ export default function Header() {
                   <li>
                     <Link
                       to="/signin"
-                      className="text-white hover:text-green-100 transition duration-300 bg-white bg-opacity-20 rounded-full px-4 py-2"
+                      className="text-white hover:text-blue-100 transition duration-300 bg-white bg-opacity-20 rounded-full px-4 py-2"
                     >
                       Sign In
                     </Link>
@@ -100,7 +109,7 @@ export default function Header() {
                   <li>
                     <Link
                       to="/signup"
-                      className="text-white hover:text-green-100 transition duration-300 bg-green-500 rounded-full px-4 py-2"
+                      className="text-white hover:text-blue-100 transition duration-300 bg-blue-500 rounded-full px-4 py-2"
                     >
                       Sign Up
                     </Link>
