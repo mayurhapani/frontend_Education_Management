@@ -1,9 +1,29 @@
-import { useState } from "react";
-import { TextField, Button, Box } from "@mui/material";
-import PropTypes from 'prop-types';
+import { useState, useEffect } from "react";
+import { TextField, Button, Box, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import PropTypes from "prop-types";
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const CourseForm = ({ onSubmit, initialData = {} }) => {
-  const [courseData, setCourseData] = useState(initialData);
+  const [courseData, setCourseData] = useState({
+    title: initialData.title || "",
+    description: initialData.description || "",
+    teacher: initialData.teacher || "",
+  });
+  const [teachers, setTeachers] = useState([]);
+
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/users/getTeachers`);
+        setTeachers(response.data.data);
+      } catch (error) {
+        console.error("Error fetching teachers:", error);
+      }
+    };
+    fetchTeachers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -12,31 +32,54 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(courseData);
+    if (typeof onSubmit === "function") {
+      onSubmit(courseData);
+    } else { 
+      console.error("onSubmit is not a function");
+    }
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
       <TextField
-        label="Course Name"
-        name="name"
-        value={courseData.name || ""}
+        label="Course Title"
+        name="title"
+        value={courseData.title}
         onChange={handleChange}
         fullWidth
         required
+        sx={{ mb: 2 }}
       />
       <TextField
         label="Description"
         name="description"
-        value={courseData.description || ""}
+        value={courseData.description}
         onChange={handleChange}
         fullWidth
         required
         multiline
         rows={4}
-        sx={{ mt: 2 }}
+        sx={{ mb: 2 }}
       />
-      <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel id="teacher-select-label">Teacher</InputLabel>
+        <Select
+          labelId="teacher-select-label"
+          id="teacher-select"
+          name="teacher"
+          value={courseData.teacher}
+          label="Teacher"
+          onChange={handleChange}
+          required
+        >
+          {teachers.map((teacher) => (
+            <MenuItem key={teacher._id} value={teacher._id}>
+              {teacher.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Button type="submit" variant="contained" color="primary">
         Save Course
       </Button>
     </Box>
@@ -44,8 +87,8 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
 };
 
 CourseForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  initialData: PropTypes.object
+  onSubmit: PropTypes.func,
+  initialData: PropTypes.object,
 };
 
 export default CourseForm;
