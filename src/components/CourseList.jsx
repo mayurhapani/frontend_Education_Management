@@ -11,23 +11,25 @@ import {
 } from "@mui/material";
 import axios from "axios";
 
-const GradeList = () => {
-  const [grades, setGrades] = useState([]);
+const CourseList = () => {
+  const [courses, setCourses] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalGrades, setTotalGrades] = useState(0);
+  const [totalCourses, setTotalCourses] = useState(0);
 
   useEffect(() => {
-    fetchGrades();
+    fetchCourses();
   }, [page, rowsPerPage]);
 
-  const fetchGrades = async () => {
+  const fetchCourses = async () => {
     try {
-      const response = await axios.get(`/api/v1/grades?page=${page + 1}&limit=${rowsPerPage}`);
-      setGrades(response.data.data.docs);
-      setTotalGrades(response.data.data.totalDocs);
+      const response = await axios.get(
+        `/api/v1/courses/getAllCourses?page=${page + 1}&limit=${rowsPerPage}`
+      );
+      setCourses(response.data.data.docs);
+      setTotalCourses(response.data.data.totalDocs);
     } catch (error) {
-      console.error("Error fetching grades:", error);
+      console.error("Error fetching courses:", error);
     }
   };
 
@@ -46,21 +48,21 @@ const GradeList = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Student</TableCell>
-              <TableCell>Course</TableCell>
-              <TableCell>Grade</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Teacher</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {grades.map((grade) => (
-              <TableRow key={grade._id}>
-                <TableCell>{grade.student.name}</TableCell>
-                <TableCell>{grade.course.title}</TableCell>
-                <TableCell>{grade.grade}</TableCell>
+            {courses.map((course) => (
+              <TableRow key={course._id}>
+                <TableCell>{course.title}</TableCell>
+                <TableCell>{course.description}</TableCell>
+                <TableCell>{course.teacher.name}</TableCell>
               </TableRow>
             ))}
             {/* Fill remaining rows to maintain fixed table size */}
-            {Array.from(Array(rowsPerPage - grades.length)).map((_, index) => (
+            {Array.from(Array(rowsPerPage - courses.length)).map((_, index) => (
               <TableRow key={`empty-${index}`}>
                 <TableCell colSpan={3} />
               </TableRow>
@@ -71,7 +73,7 @@ const GradeList = () => {
       <TablePagination
         rowsPerPageOptions={[10]}
         component="div"
-        count={totalGrades}
+        count={totalCourses}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
@@ -81,4 +83,4 @@ const GradeList = () => {
   );
 };
 
-export default GradeList;
+export default CourseList;
