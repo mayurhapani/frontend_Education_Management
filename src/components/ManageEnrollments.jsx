@@ -62,7 +62,7 @@ const ManageEnrollments = ({ courses, refreshAssignments }) => {
       setSelectedCourse("");
       setSelectedStudents([]);
     } catch (error) {
-      toast.error("Error enrolling students");
+      toast.error(error.response.data.message);
       console.error("Error enrolling students:", error);
     }
   };
