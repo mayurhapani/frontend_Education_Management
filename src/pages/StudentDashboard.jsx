@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Container, Typography, Grid, Paper, Box } from "@mui/material";
-import CourseList from "../components/CourseList";
-import GradeList from "../components/GradeList";
-import AssignmentList from "../components/AssignmentList";
-import CourseProgress from "../components/CourseProgress";
-import SubmitAssignment from "../components/SubmitAssignment";
+import CourseList from "../components/CourseList.jsx";
+import GradeList from "../components/GradeList.jsx";
+import AssignmentList from "../components/AssignmentList.jsx";
+import CourseProgress from "../components/CourseProgress.jsx";
+import SubmitAssignment from "../components/SubmitAssignment.jsx";
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -78,7 +78,7 @@ const StudentDashboard = () => {
             <Typography variant="h6" gutterBottom>
               Course Progress
             </Typography>
-            <Box sx={{ height: "calc(100% - 40px)", overflow: "auto" }}>
+            <Box sx={{ height: "calc(100% - 40px)", overflow: "hidden" }}>
               <CourseProgress refreshKey={refreshKey} onRefresh={handleRefresh} />
             </Box>
           </Paper>

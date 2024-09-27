@@ -8,8 +8,6 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const CourseProgress = ({ refreshKey }) => {
   const [courses, setCourses] = useState([]);
 
-  console.log(courses);
-
   useEffect(() => {
     fetchEnrolledCourses();
   }, [refreshKey]);
@@ -20,6 +18,7 @@ const CourseProgress = ({ refreshKey }) => {
       const response = await axios.get(`${BASE_URL}/courses/enrolled`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setCourses(response.data.data);
     } catch (error) {
       console.error("Error fetching enrolled courses:", error);
