@@ -6,15 +6,6 @@ import PropTypes from "prop-types";
 // Set axios to always send credentials
 axios.defaults.withCredentials = true;
 
-// Add this function near the top of the file
-const decodeToken = (token) => {
-  try {
-    return JSON.parse(atob(token.split(".")[1]));
-  } catch (e) {
-    return null;
-  }
-};
-
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -118,12 +109,9 @@ export const AuthProvider = ({ children }) => {
         { email, password },
         { withCredentials: true }
       );
-      console.log("Login response:", response.data);
 
       if (response.data.success && response.data.data && response.data.data.token) {
         setToken(response.data.data.token);
-        console.log("Token saved:", response.data.data.token);
-        console.log("Decoded token:", decodeToken(response.data.data.token));
 
         setIsLoggedIn(true);
         setUser(response.data.data.user);
@@ -153,22 +141,23 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       console.log("Attempting logout...");
-      await axios.get(`${BASE_URL}/users/logout`, { withCredentials: true });
-      removeToken();
-      setIsLoggedIn(false);
-      setUser(null);
-      setUserName("");
-      setUserRole("");
-      console.log("Logout successful");
+      const token = getToken();
+      await axios.get(`${BASE_URL}/users/logout`, {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Logout request successful");
     } catch (error) {
-      console.error("Logout error:", error.response ? error.response.data : error.message);
+      console.error("Logout request error:", error.response ? error.response.data : error.message);
     } finally {
-      // Ensure state is reset even if the logout request fails
+      // Always perform these actions, regardless of server response
       removeToken();
       setIsLoggedIn(false);
       setUser(null);
       setUserName("");
       setUserRole("");
+      localStorage.removeItem("userRole");
+      console.log("Client-side logout completed");
     }
   };
 

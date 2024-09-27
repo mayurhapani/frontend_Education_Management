@@ -6,33 +6,37 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   TablePagination,
   IconButton,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
-import PropTypes from "prop-types";
+import CourseForm from "./CourseForm";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const CourseList = ({ initialCourses = [] }) => {
-  const [courses, setCourses] = useState(initialCourses);
+const CourseList = () => {
+  const [courses, setCourses] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalCourses, setTotalCourses] = useState(initialCourses.length);
+  const [rowsPerPage] = useState(10);
+  const [totalCourses, setTotalCourses] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
 
   useEffect(() => {
-    if (initialCourses.length > 0) {
-      setCourses(initialCourses);
-      setTotalCourses(initialCourses.length);
-    } else {
-      fetchCourses();
-    }
+    fetchCourses();
     checkAdminStatus();
-  }, [initialCourses, page, rowsPerPage]);
+  }, [page]);
 
   const checkAdminStatus = () => {
     const userRole = localStorage.getItem("userRole");
@@ -71,29 +75,63 @@ const CourseList = ({ initialCourses = [] }) => {
     }
   };
 
+  const handleEdit = (course) => {
+    setEditingCourse({
+      ...course,
+      teacher: course.teacher?._id || "", // Use teacher ID instead of the whole object
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingCourse(null); // Reset editingCourse when closing the modal
+  };
+
+  const handleUpdateCourse = async (updatedCourseData) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(`${BASE_URL}/courses/update/${editingCourse._id}`, updatedCourseData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchCourses();
+      handleCloseEditModal();
+    } catch (error) {
+      console.error("Error updating course:", error);
+    }
+  };
+
+  const handleDelete = (course) => {
+    setCourseToDelete(course);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setCourseToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${BASE_URL}/courses/delete/${courseToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchCourses();
+      handleCloseDeleteModal();
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    }
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleEdit = (courseId) => {
-    // Implement edit functionality
-    console.log("Edit course:", courseId);
-  };
-
-  const handleDelete = (courseId) => {
-    // Implement delete functionality
-    console.log("Delete course:", courseId);
-  };
-
   return (
-    <Paper>
-      <TableContainer>
-        <Table>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <TableContainer sx={{ flexGrow: 1, overflow: "auto" }}>
+        <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
               <TableCell>Title</TableCell>
@@ -104,46 +142,80 @@ const CourseList = ({ initialCourses = [] }) => {
           </TableHead>
           <TableBody>
             {courses.map((course) => (
-              <TableRow key={course._id}>
+              <TableRow
+                key={course._id}
+                sx={{
+                  height: "40px",
+                  "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+                }}
+              >
                 <TableCell>{course.title}</TableCell>
                 <TableCell>{course.description}</TableCell>
-                <TableCell>{course.teacher?.name || 'N/A'}</TableCell>
+                <TableCell>{course.teacher?.name || "N/A"}</TableCell>
                 {isAdmin && (
                   <TableCell>
-                    <IconButton onClick={() => handleEdit(course._id)}>
-                      <EditIcon />
+                    <IconButton size="small" onClick={() => handleEdit(course)}>
+                      <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(course._id)}>
-                      <DeleteIcon />
+                    <IconButton size="small" onClick={() => handleDelete(course)}>
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
                   </TableCell>
                 )}
               </TableRow>
             ))}
-            {/* Fill remaining rows to maintain fixed table size */}
-            {Array.from(Array(rowsPerPage - courses.length)).map((_, index) => (
-              <TableRow key={`empty-${index}`}>
-                <TableCell colSpan={3} />
+            {Array.from({ length: Math.max(0, rowsPerPage - courses.length) }).map((_, index) => (
+              <TableRow
+                key={`empty-${index}`}
+                sx={{
+                  height: "40px",
+                  "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+                }}
+              >
+                <TableCell colSpan={isAdmin ? 4 : 3} />
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[10]}
         component="div"
         count={totalCourses}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[]}
       />
-    </Paper>
-  );
-};
 
-CourseList.propTypes = {
-  initialCourses: PropTypes.array
+      {/* Edit Course Modal */}
+      <Dialog open={isEditModalOpen} onClose={handleCloseEditModal}>
+        <DialogTitle>Edit Course</DialogTitle>
+        <DialogContent>
+          {editingCourse && (
+            <CourseForm
+              onSubmit={handleUpdateCourse}
+              onCancel={handleCloseEditModal}
+              initialData={editingCourse}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Course Modal */}
+      <Dialog open={isDeleteModalOpen} onClose={handleCloseDeleteModal}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete the course &ldquo;{courseToDelete?.title}&rdquo;?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteModal}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
 };
 
 export default CourseList;

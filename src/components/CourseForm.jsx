@@ -6,11 +6,11 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const token = localStorage.getItem("token");
 
-const CourseForm = ({ onSubmit, initialData = {} }) => {
+const CourseForm = ({ onSubmit, onCancel, initialData = {} }) => {
   const [courseData, setCourseData] = useState({
-    title: initialData.title || "",
-    description: initialData.description || "",
-    teacher: initialData.teacher || "",
+    title: initialData?.title || "",
+    description: initialData?.description || "",
+    teacher: initialData?.teacher || "",
   });
   const [teachers, setTeachers] = useState([]);
 
@@ -30,6 +30,15 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
     fetchTeachers();
   }, []);
 
+  useEffect(() => {
+    // Update courseData when initialData changes
+    setCourseData({
+      title: initialData?.title || "",
+      description: initialData?.description || "",
+      teacher: initialData?.teacher || "",
+    });
+  }, [initialData]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCourseData({ ...courseData, [name]: value });
@@ -43,6 +52,9 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
       console.error("onSubmit is not a function");
     }
   };
+
+  // Check if the current teacher value is valid
+  const isValidTeacher = teachers.some((teacher) => teacher._id === courseData.teacher);
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
@@ -72,7 +84,7 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
           labelId="teacher-select-label"
           id="teacher-select"
           name="teacher"
-          value={courseData.teacher}
+          value={isValidTeacher ? courseData.teacher : ""}
           label="Teacher"
           onChange={handleChange}
           required
@@ -84,15 +96,21 @@ const CourseForm = ({ onSubmit, initialData = {} }) => {
           ))}
         </Select>
       </FormControl>
-      <Button type="submit" variant="contained" color="primary">
-        Save Course
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+        <Button onClick={onCancel} variant="outlined">
+          Cancel
+        </Button>
+        <Button type="submit" variant="contained" color="primary">
+          Save Course
+        </Button>
+      </Box>
     </Box>
   );
 };
 
 CourseForm.propTypes = {
   onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
   initialData: PropTypes.object,
 };
 
