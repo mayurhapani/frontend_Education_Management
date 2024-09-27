@@ -1,15 +1,35 @@
 import { Container, Typography, Grid, Paper, Box } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CourseList from "../components/CourseList";
 import StudentList from "../components/StudentList";
 import TeacherList from "../components/TeacherList";
 import AssignmentList from "../components/AssignmentList";
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const AdminDashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [refreshKey]);
+
+  const fetchCourses = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${BASE_URL}/courses/getAllCourses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCourses(response.data.data.docs || []);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
 
   const handleRefresh = () => {
-    setRefreshKey(prevKey => prevKey + 1);
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   return (
@@ -44,7 +64,7 @@ const AdminDashboard = () => {
               Courses
             </Typography>
             <Box sx={{ height: "calc(100% - 40px)" }}>
-              <CourseList refreshKey={refreshKey} onRefresh={handleRefresh} />
+              <CourseList courses={courses} onCourseSelect={() => {}} studentView={false} />
             </Box>
           </Paper>
         </Grid>

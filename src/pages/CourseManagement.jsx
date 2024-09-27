@@ -44,6 +44,10 @@ const CourseManagement = () => {
     }
   };
 
+  const handleCourseSelect = (course) => {
+    console.log("Selected course:", course);
+  };
+
   return (
     <Container maxWidth="lg" className="mt-10">
       <Typography variant="h4" gutterBottom>
@@ -63,7 +67,7 @@ const CourseManagement = () => {
             <Typography variant="h6" gutterBottom>
               Courses
             </Typography>
-            <CourseList courses={courses} />
+            <CourseList courses={courses} onCourseSelect={handleCourseSelect} />
           </Paper>
         </Grid>
       </Grid>

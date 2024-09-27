@@ -23,7 +23,6 @@ const StudentDashboard = () => {
       const response = await axios.get(`${BASE_URL}/courses/enrolled`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("data", response.data.data);
       setCourses(response.data.data || []);
     } catch (error) {
       console.error("Error fetching courses:", error);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TextField, Button, Box, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import PropTypes from "prop-types";
 import axios from "axios";
@@ -13,6 +13,7 @@ const CourseForm = ({ onSubmit, onCancel, initialData = {} }) => {
     teacher: initialData?.teacher || "",
   });
   const [teachers, setTeachers] = useState([]);
+  const isMounted = useRef(false);
 
   useEffect(() => {
     const fetchTeachers = async () => {
@@ -31,12 +32,14 @@ const CourseForm = ({ onSubmit, onCancel, initialData = {} }) => {
   }, []);
 
   useEffect(() => {
-    // Update courseData when initialData changes
-    setCourseData({
-      title: initialData?.title || "",
-      description: initialData?.description || "",
-      teacher: initialData?.teacher || "",
-    });
+    if (!isMounted.current) {
+      isMounted.current = true;
+      setCourseData({
+        title: initialData?.title || "",
+        description: initialData?.description || "",
+        teacher: initialData?.teacher || "",
+      });
+    }
   }, [initialData]);
 
   const handleChange = (e) => {
@@ -61,7 +64,7 @@ const CourseForm = ({ onSubmit, onCancel, initialData = {} }) => {
       <TextField
         label="Course Title"
         name="title"
-        value={courseData.title}
+        value={courseData?.title}
         onChange={handleChange}
         fullWidth
         required
@@ -70,7 +73,7 @@ const CourseForm = ({ onSubmit, onCancel, initialData = {} }) => {
       <TextField
         label="Description"
         name="description"
-        value={courseData.description}
+        value={courseData?.description}
         onChange={handleChange}
         fullWidth
         required

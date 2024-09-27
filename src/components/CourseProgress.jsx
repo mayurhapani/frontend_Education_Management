@@ -33,11 +33,11 @@ const CourseProgress = ({ refreshKey }) => {
           <Typography variant="subtitle1">{course.title}</Typography>
           <LinearProgress
             variant="determinate"
-            value={course.progress}
+            value={course.progress || 0} // Ensure value is always defined
             sx={{ height: 10, borderRadius: 5 }}
           />
           <Typography variant="body2" color="text.secondary">
-            {`${Math.round(course.progress)}% Complete`}
+            {`${Math.round(course.progress || 0)}% Complete`}
           </Typography>
         </Box>
       ))}
