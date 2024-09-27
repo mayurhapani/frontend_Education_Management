@@ -1,19 +1,19 @@
-# Expense Management Frontend
+# Education Management System Frontend
 
-This is the frontend application for an Expense Management system, built with React and Vite.
+This is the frontend application for an Education Management system, built with React and Vite.
 
 ## Live Demo
 
-You can access the live application here: https://frontend-expense-management.vercel.app
+You can access the live application here: https://frontend-education-management.vercel.app
 
 ## Features
 
 - User authentication (login/signup)
-- Dashboard with expense overview
-- Add, edit, and delete expenses
-- Categorize expenses
-- Visualize expenses with charts
-- CSV import/export functionality
+- Dashboard for students, teachers, and admins
+- Manage courses, assignments, and grades
+- Track course progress
+- Submit and grade assignments
+- Role-based access control (RBAC)
 - Responsive design for mobile and desktop
 
 ## Technologies Used
@@ -22,7 +22,6 @@ You can access the live application here: https://frontend-expense-management.ve
 - Vite
 - Material-UI
 - Axios for API requests
-- Chart.js for data visualization
 - React Router for navigation
 - React Toastify for notifications
 - Tailwind CSS for styling
@@ -39,13 +38,13 @@ You can access the live application here: https://frontend-expense-management.ve
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/mayurhapani/frontend_Expense_Management.git
+   git clone https://github.com/mayurhapani/frontend_Education_Management.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd frontend_Expense_Management
+   cd frontend_Education_Management
    ```
 
 3. Install dependencies:
@@ -110,12 +109,11 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Contact
 
-Project Link: https://github.com/mayurhapani/frontend_Expense_Management.git
+Project Link: https://github.com/mayurhapani/frontend_Education_Management.git
 
 ## Acknowledgements
 
 - [React](https://reactjs.org/)
 - [Vite](https://vitejs.dev/)
 - [Material-UI](https://mui.com/)
-- [Chart.js](https://www.chartjs.org/)
 - [Vercel](https://vercel.com/)
