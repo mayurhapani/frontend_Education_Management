@@ -6,6 +6,11 @@ This is the frontend application for an Education Management system, built with 
 
 You can access the live application here: https://frontend-education-management.vercel.app
 
+# the admin credentials are:
+
+email: hapanimayur@gmail.com
+password: Mayur@123
+
 ## Features
 
 - User authentication (login/signup)
