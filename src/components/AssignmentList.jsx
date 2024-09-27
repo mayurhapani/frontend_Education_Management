@@ -86,10 +86,14 @@ const AssignmentList = ({ refreshKey, studentView }) => {
       const response = await axios.get(`${BASE_URL}/assignments/submitted`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      setAssignments(response.data.data);
+
       const submittedMap = {};
       response?.data?.data?.forEach((submission) => {
         submittedMap[submission.assignment] = true;
       });
+
       setSubmittedAssignments(submittedMap);
     } catch (error) {
       console.error("Error fetching submitted assignments:", error);
@@ -146,7 +150,7 @@ const AssignmentList = ({ refreshKey, studentView }) => {
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <TableContainer sx={{ flexGrow: 1, overflow: "auto" }}>
+      <TableContainer sx={{ flexGrow: 1, overflow: "hidden" }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
@@ -159,33 +163,52 @@ const AssignmentList = ({ refreshKey, studentView }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {assignments.map((assignment) => (
-              <TableRow
-                key={assignment._id}
-                sx={{
-                  height: "40px",
-                  "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
-                }}
-              >
-                <TableCell>{assignment.title}</TableCell>
-                <TableCell>{assignment.description}</TableCell>
-                <TableCell>{new Date(assignment.dueDate).toLocaleDateString()}</TableCell>
-                <TableCell>{assignment.course ? assignment.course.title : "N/A"}</TableCell>
-                {studentView && (
-                  <TableCell>{submittedAssignments[assignment._id] ? "Yes" : "No"}</TableCell>
-                )}
-                {isTeacherOrAdmin && (
-                  <TableCell>
-                    <IconButton size="small" onClick={() => handleEdit(assignment)}>
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleDelete(assignment._id)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
+            {isTeacherOrAdmin
+              ? assignments.map((assignment) => (
+                  <TableRow
+                    key={assignment._id}
+                    sx={{
+                      height: "40px",
+                      "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+                    }}
+                  >
+                    <TableCell>{assignment.title}</TableCell>
+                    <TableCell>{assignment.description}</TableCell>
+                    <TableCell>{new Date(assignment.dueDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{assignment.course ? assignment.course.title : "N/A"}</TableCell>
+
+                    <TableCell>
+                      <IconButton size="small" onClick={() => handleEdit(assignment)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleDelete(assignment._id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              : assignments.map((assignment) => (
+                  <TableRow
+                    key={assignment.assignment._id}
+                    sx={{
+                      height: "40px",
+                      "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+                    }}
+                  >
+                    <TableCell>{assignment.assignment.title}</TableCell>
+                    <TableCell>{assignment.assignment.description}</TableCell>
+                    <TableCell>
+                      {new Date(assignment.assignment.dueDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {assignment.assignment.course ? assignment.assignment.course.title : "N/A"}
+                    </TableCell>
+
+                    <TableCell>
+                      {submittedAssignments[assignment.assignment._id] ? "Yes" : "No"}
+                    </TableCell>
+                  </TableRow>
+                ))}
             {Array.from({ length: Math.max(0, rowsPerPage - assignments.length) }).map(
               (_, index) => (
                 <TableRow
@@ -195,7 +218,7 @@ const AssignmentList = ({ refreshKey, studentView }) => {
                     "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
                   }}
                 >
-                  <TableCell colSpan={isTeacherOrAdmin ? 5 : 4} />
+                  <TableCell colSpan={5} />
                 </TableRow>
               )
             )}

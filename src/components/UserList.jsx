@@ -140,7 +140,7 @@ const UserList = ({ role }) => {
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <TableContainer sx={{ flexGrow: 1, overflow: "auto" }}>
+      <TableContainer sx={{ flexGrow: 1, overflow: "hidden" }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
@@ -196,7 +196,7 @@ const UserList = ({ role }) => {
         onPageChange={handleChangePage}
         rowsPerPageOptions={[]}
       />
-      
+
       {/* Edit User Dialog */}
       <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
         <DialogTitle>Edit User</DialogTitle>
@@ -241,12 +241,12 @@ const UserList = ({ role }) => {
       {/* Delete User Dialog */}
       <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
         <DialogTitle>Delete User</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this user?
-        </DialogContent>
+        <DialogContent>Are you sure you want to delete this user?</DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-          <Button onClick={handleDeleteConfirm} color="error">Delete</Button>
+          <Button onClick={handleDeleteConfirm} color="error">
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

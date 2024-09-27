@@ -132,7 +132,7 @@ const GradeList = ({ refreshKey }) => {
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <TableContainer sx={{ flexGrow: 1, overflow: "auto" }}>
+      <TableContainer sx={{ flexGrow: 1, overflow: "hidden" }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
