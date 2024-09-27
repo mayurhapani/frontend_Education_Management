@@ -19,11 +19,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import CourseForm from "./CourseForm";
+import PropTypes from "prop-types";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const CourseList = () => {
-  const [courses, setCourses] = useState([]);
+const CourseList = ({ studentView, courses, onCourseSelect }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(10);
   const [totalCourses, setTotalCourses] = useState(0);
@@ -35,10 +35,10 @@ const CourseList = () => {
 
   useEffect(() => {
     fetchCourses();
-    checkAdminStatus();
-  }, [page]);
+    checkUserRole();
+  }, [page, studentView]);
 
-  const checkAdminStatus = () => {
+  const checkUserRole = () => {
     const userRole = localStorage.getItem("userRole");
     setIsAdmin(userRole === "admin");
   };
@@ -50,27 +50,25 @@ const CourseList = () => {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.get(
-        `${BASE_URL}/courses/getAllCourses?page=${page + 1}&limit=${rowsPerPage}`,
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const url = studentView
+        ? `${BASE_URL}/courses/enrolled`
+        : `${BASE_URL}/courses/getAllCourses?page=${page + 1}&limit=${rowsPerPage}`;
+
+      const response = await axios.get(url, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.data && response.data.data) {
-        setCourses(response.data.data.docs || []);
         setTotalCourses(response.data.data.totalDocs || 0);
       } else {
         console.error("Unexpected API response structure:", response.data);
-        setCourses([]);
         setTotalCourses(0);
       }
     } catch (error) {
       console.error("Error fetching courses:", error.response?.data || error.message);
-      setCourses([]);
       setTotalCourses(0);
     }
   };
@@ -137,7 +135,7 @@ const CourseList = () => {
               <TableCell>Title</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Teacher</TableCell>
-              {isAdmin && <TableCell>Actions</TableCell>}
+              {!studentView && isAdmin && <TableCell>Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -148,11 +146,12 @@ const CourseList = () => {
                   height: "40px",
                   "&:nth-of-type(odd)": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
                 }}
+                onClick={() => onCourseSelect(course)}
               >
                 <TableCell>{course.title}</TableCell>
                 <TableCell>{course.description}</TableCell>
                 <TableCell>{course.teacher?.name || "N/A"}</TableCell>
-                {isAdmin && (
+                {!studentView && isAdmin && (
                   <TableCell>
                     <IconButton size="small" onClick={() => handleEdit(course)}>
                       <EditIcon fontSize="small" />
@@ -216,6 +215,12 @@ const CourseList = () => {
       </Dialog>
     </Box>
   );
+};
+
+CourseList.propTypes = {
+  studentView: PropTypes.bool,
+  courses: PropTypes.array.isRequired,
+  onCourseSelect: PropTypes.func.isRequired,
 };
 
 export default CourseList;

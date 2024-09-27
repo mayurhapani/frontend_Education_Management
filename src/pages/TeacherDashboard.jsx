@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -15,12 +15,50 @@ import AssignmentList from "../components/AssignmentList";
 import GradeList from "../components/GradeList";
 import AddAssignmentForm from "../components/AddAssignmentForm";
 import AddGradeForm from "../components/AddGradeForm";
+import ManageEnrollments from "../components/ManageEnrollments";
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const TeacherDashboard = () => {
   const [openAssignmentDialog, setOpenAssignmentDialog] = useState(false);
   const [openGradeDialog, setOpenGradeDialog] = useState(false);
   const [refreshAssignmentKey, setRefreshAssignmentKey] = useState(0);
   const [refreshGradeKey, setRefreshGradeKey] = useState(0);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    fetchUserRole();
+    fetchCourses();
+  }, []);
+
+  const fetchUserRole = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${BASE_URL}/users/getUser`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserRole(response.data.data.role);
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const url =
+        userRole === "admin" ? `${BASE_URL}/courses` : `${BASE_URL}/courses/teacherCourses`;
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCourses(response.data.data.docs);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
 
   const handleOpenAssignmentDialog = () => setOpenAssignmentDialog(true);
   const handleCloseAssignmentDialog = () => setOpenAssignmentDialog(false);
@@ -35,6 +73,10 @@ const TeacherDashboard = () => {
     setRefreshGradeKey((prevKey) => prevKey + 1);
   }, []);
 
+  const handleCourseSelect = (course) => {
+    setSelectedCourse(course);
+  };
+
   return (
     <Container maxWidth="lg" className="mt-10">
       <Typography variant="h4" gutterBottom>
@@ -47,7 +89,7 @@ const TeacherDashboard = () => {
               Courses
             </Typography>
             <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
-              <CourseList />
+              <CourseList courses={courses} onCourseSelect={handleCourseSelect} />
             </Box>
           </Paper>
         </Grid>
@@ -65,7 +107,7 @@ const TeacherDashboard = () => {
               </Button>
             </Box>
             <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
-              <AssignmentList refreshKey={refreshAssignmentKey} />
+              <AssignmentList refreshKey={refreshAssignmentKey} courseId={selectedCourse?._id} />
             </Box>
           </Paper>
         </Grid>
@@ -83,9 +125,12 @@ const TeacherDashboard = () => {
               </Button>
             </Box>
             <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
-              <GradeList refreshKey={refreshGradeKey} />
+              <GradeList refreshKey={refreshGradeKey} courseId={selectedCourse?._id} />
             </Box>
           </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <ManageEnrollments courses={courses} refreshAssignments={refreshAssignments} />
         </Grid>
       </Grid>
 
