@@ -53,6 +53,7 @@ const CourseList = ({ studentView, courses, onCourseSelect }) => {
       const url = studentView
         ? `${BASE_URL}/courses/enrolled`
         : `${BASE_URL}/courses/getAllCourses?page=${page + 1}&limit=${rowsPerPage}`;
+      console.log(url);
 
       const response = await axios.get(url, {
         withCredentials: true,

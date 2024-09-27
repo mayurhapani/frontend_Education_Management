@@ -1,13 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Typography, Grid, Paper, Box } from "@mui/material";
 import CourseList from "../components/CourseList";
 import GradeList from "../components/GradeList";
 import AssignmentList from "../components/AssignmentList";
 import CourseProgress from "../components/CourseProgress";
-import SubmitAssignment from "../components/SubmitAssignment"; // New component
+import SubmitAssignment from "../components/SubmitAssignment";
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const StudentDashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [refreshKey]);
+
+  const fetchCourses = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${BASE_URL}/courses/enrolled`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("data", response.data.data);
+      setCourses(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
 
   const handleRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
@@ -25,7 +46,7 @@ const StudentDashboard = () => {
               My Courses
             </Typography>
             <Box sx={{ height: "calc(100% - 40px)", overflow: "auto" }}>
-              <CourseList refreshKey={refreshKey} onRefresh={handleRefresh} studentView={true} />
+              <CourseList courses={courses} onCourseSelect={() => {}} studentView={true} />
             </Box>
           </Paper>
         </Grid>
@@ -45,7 +66,11 @@ const StudentDashboard = () => {
               Assignments
             </Typography>
             <Box sx={{ height: "calc(100% - 40px)", overflow: "auto" }}>
-              <AssignmentList refreshKey={refreshKey} onRefresh={handleRefresh} studentView={true} />
+              <AssignmentList
+                refreshKey={refreshKey}
+                onRefresh={handleRefresh}
+                studentView={true}
+              />
             </Box>
           </Paper>
         </Grid>
